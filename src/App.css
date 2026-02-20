@@ -1,0 +1,28 @@
+@keyframes fadeInBackdrop {
+  from {
+    background-color: rgba(15, 23, 42, 0);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(5px);
+  }
+}
+
+@keyframes popInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-backdrop {
+  animation: fadeInBackdrop 1s ease-out forwards;
+}
+.animate-pop-in {
+  animation: popInModal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
