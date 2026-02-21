@@ -1,17 +1,20 @@
 import axios from "axios";
-import {
-  getLocalAccessToken,
-  setLocalAccessToken,
-} from "../services/TokenService";
 import { toast } from "sonner";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-const axiosClient = axios.create({
+export const axiosClient = axios.create({
   baseURL: baseURL,
   withCredentials: true,
   timeout: 60000,
 });
+
+let inMemoryToken = null;
+
+// Đây là "ống hút" để React Context bơm token vào
+export const setAxiosToken = (token) => {
+  inMemoryToken = token;
+};
 // ==========================================
 // HỆ THỐNG HÀNG ĐỢI (VIẾT KIỂU PUB/SUB SIÊU GỌN)
 // ==========================================
@@ -33,8 +36,7 @@ const onRefreshFailed = (error) => {
 // REQUEST INTERCEPTOR
 // ==========================================
 axiosClient.interceptors.request.use((config) => {
-  const token = getLocalAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (inMemoryToken) config.headers.Authorization = `Bearer ${inMemoryToken}`;
   return config;
 });
 
@@ -101,5 +103,3 @@ axiosClient.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-export default axiosClient;

@@ -25,13 +25,12 @@ export const useGoogleAuth = () => {
 
       // Giả sử backend trả về: { status: "success", data: { user, accessToken } }
       const { user, accessToken } = response.data.data;
-
       setAccessToken(accessToken);
       setUser({ id: user.id, email: user.email, role: user.role });
       showNotification("success", "Đăng nhập thành công");
       onClose();
       console.log("✅ Đăng nhập thành công, chuyển hướng...");
-      navigate("/dashboard");
+      navigate("/workspace");
     } catch (error) {
       console.error(
         "❌ Lỗi Google Login:",

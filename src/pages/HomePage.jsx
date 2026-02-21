@@ -9,6 +9,10 @@ const HomePage = () => {
 
   return (
     <>
+      {isLoginModalOpen && (
+        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
+      )}
+
       <div className="bg-white min-vh-100">
         {/* ================= HERO SECTION (Bố cục Trái - Phải) ================= */}
         <div className="container px-4 py-5 mt-3">
@@ -40,7 +44,7 @@ const HomePage = () => {
               <div className="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-lg-start">
                 {user ? (
                   <Link
-                    to="/dashboard"
+                    to="/workspace"
                     className="btn btn-dark btn-lg px-4 py-3 rounded-3 fw-medium shadow-sm d-flex align-items-center justify-content-center gap-2"
                   >
                     Mở Workspace
@@ -289,12 +293,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      {isLoginModalOpen && (
-        <LoginModal
-          show={isLoginModalOpen}
-          onClose={() => setIsLoginModalOpen(false)}
-        />
-      )}
     </>
   );
 };

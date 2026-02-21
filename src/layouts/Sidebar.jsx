@@ -86,7 +86,7 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/dashboard" className={getNavItemClass("/dashboard")}>
+              <Link to="/workspace" className={getNavItemClass("/workspace")}>
                 <svg
                   width="18"
                   height="18"
@@ -115,9 +115,9 @@ const Sidebar = () => {
           </div>
           <ul className="nav flex-column mb-4">
             <li className="nav-item">
-              <a
-                href="#"
-                className="nav-link text-secondary d-flex align-items-center gap-2 py-2 px-3 mb-1 rounded"
+              <Link
+                to="/database-management"
+                className={getNavItemClass("/database-management")}
                 style={{ cursor: "pointer" }}
               >
                 <svg
@@ -135,7 +135,7 @@ const Sidebar = () => {
                   <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
                 </svg>
                 Quản lý Database
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
               <a

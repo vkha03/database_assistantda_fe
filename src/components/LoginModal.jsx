@@ -1,12 +1,9 @@
-import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useGoogleAuth } from "../hooks/useGoogleAuth";
 
-const LoginModal = ({ show, onClose }) => {
+const LoginModal = ({ onClose }) => {
   const { handleGoogleLogin } = useGoogleAuth();
 
-  // Nếu show = false thì không render gì cả
-  if (!show) return null;
   return (
     // THẺ 1: Nền mờ (Backdrop) - Dùng class animate-backdrop
     <div
