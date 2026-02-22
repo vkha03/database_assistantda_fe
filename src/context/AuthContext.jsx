@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 // import { setLocalAccessToken } from "../services/TokenService";
 import { useNotificationContext } from "./NotificationContext";
-import { setAxiosToken } from "../api/axiosClient";
+import { setAxiosToken, subscribeTokenRefresh } from "../api/axiosClient";
 
 const AuthContext = createContext(null);
 
@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         setAccessToken(accessToken);
         setUser(user);
         setAxiosToken(accessToken);
+        subscribeTokenRefresh(setAccessToken);
       } catch (err) {
         console.error("Bạn chưa đăng nhập");
         setAccessToken(null);

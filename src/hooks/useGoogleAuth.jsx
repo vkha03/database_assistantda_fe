@@ -2,6 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { useNotificationContext } from "../context/NotificationContext";
+import { setAxiosToken } from "../api/axiosClient";
 
 export const useGoogleAuth = () => {
   const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -26,6 +27,7 @@ export const useGoogleAuth = () => {
       // Giả sử backend trả về: { status: "success", data: { user, accessToken } }
       const { user, accessToken } = response.data.data;
       setAccessToken(accessToken);
+      setAxiosToken(accessToken);
       setUser({ id: user.id, email: user.email, role: user.role });
       showNotification("success", "Đăng nhập thành công");
       onClose();

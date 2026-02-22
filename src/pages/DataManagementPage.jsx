@@ -1,29 +1,32 @@
 import React, { useState } from "react";
 import AddConnectionModal from "../components/AddConnectionModal";
+import useDisplayDatabase from "../hooks/useDisplayDatabase";
 
 const DatabaseConnectionPage = () => {
   const [openAddModal, setOpenaAddModal] = useState(false);
+  const { databases, isLoading, fetchDatabases } = useDisplayDatabase();
+  console.log(databases);
 
-  const [databases, setDatabases] = useState([
-    {
-      id: 1,
-      name: "GymConnect_Prod",
-      type: "MySQL",
-      host: "103.145.22.1",
-      port: "3306",
-      database: "gym_prod_db",
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: "Local_Testing",
-      type: "MySQL",
-      host: "localhost",
-      port: "3306",
-      database: "gym_local_test",
-      isActive: false,
-    },
-  ]);
+  // const [databases, setDatabases] = useState([
+  //   {
+  //     id: 1,
+  //     name: "GymConnect_Prod",
+  //     type: "MySQL",
+  //     host: "103.145.22.1",
+  //     port: "3306",
+  //     database: "gym_prod_db",
+  //     isActive: true,
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Local_Testing",
+  //     type: "MySQL",
+  //     host: "localhost",
+  //     port: "3306",
+  //     database: "gym_local_test",
+  //     isActive: false,
+  //   },
+  // ]);
 
   const [showSchema, setShowSchema] = useState(false);
   const [selectedDbName, setSelectedDbName] = useState("");
@@ -133,7 +136,7 @@ const DatabaseConnectionPage = () => {
 
                     <div>
                       <div className="d-flex align-items-center gap-3 mb-1">
-                        <h5 className="fw-bold m-0 text-dark">{db.name}</h5>
+                        <h5 className="fw-bold m-0 text-dark">{db.db_name}</h5>
                         {db.isActive ? (
                           <span className="badge bg-success text-white px-2 py-1 shadow-sm d-flex align-items-center gap-1">
                             <span
@@ -152,15 +155,15 @@ const DatabaseConnectionPage = () => {
                         className="text-muted font-monospace d-flex align-items-center gap-3"
                         style={{ fontSize: "0.85rem" }}
                       >
-                        <span>{db.type}</span> •{" "}
+                        <span>{"MySQL"}</span> •{" "}
                         <span>
-                          {db.host}:{db.port}
+                          {db.db_host}:{db.db_port}
                         </span>{" "}
                         •{" "}
                         <span>
                           DB:{" "}
                           <span className="text-dark fw-bold">
-                            {db.database}
+                            {db.db_name}
                           </span>
                         </span>
                       </div>

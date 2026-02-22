@@ -10,10 +10,15 @@ export const axiosClient = axios.create({
 });
 
 let inMemoryToken = null;
+let updateContextToken = null; // Thêm cái này: Hàm được React ủy quyền
 
 // Đây là "ống hút" để React Context bơm token vào
 export const setAxiosToken = (token) => {
   inMemoryToken = token;
+};
+
+export const subscribeTokenRefresh = (callback) => {
+  updateContextToken = callback;
 };
 // ==========================================
 // HỆ THỐNG HÀNG ĐỢI (VIẾT KIỂU PUB/SUB SIÊU GỌN)
@@ -75,7 +80,12 @@ axiosClient.interceptors.response.use(
         const newAccessToken = res.data.accessToken;
 
         // Lưu vào RAM
-        setLocalAccessToken(newAccessToken);
+        inMemoryToken = newAccessToken;
+
+        // ĐÁNH ĐIỆN TÍN VỀ CHO THẰNG AUTH CONTEXT! (FIX CHỖ NÀY)
+        if (updateContextToken) {
+          updateContextToken(newAccessToken);
+        }
 
         // Hét lên cho đám đang chờ biết: "Có thẻ mới rồi anh em ơi!"
         onRefreshed(newAccessToken);
@@ -84,7 +94,6 @@ axiosClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosClient(originalRequest);
       } catch (err) {
-        setLocalAccessToken(null);
         toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
         onRefreshFailed(err);
         // window.location.href = "/";

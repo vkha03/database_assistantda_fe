@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { axiosClient } from "../api/axiosClient";
+import { useNotificationContext } from "../context/NotificationContext";
 
 const useDatabases = () => {
   const [databases, setDatabases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { showNotification } = useNotificationContext();
 
   // Dùng useCallback để tránh hàm bị tạo lại liên tục gây re-render vô hạn trong useEffect
   const fetchDatabases = useCallback(async () => {
     setIsLoading(true);
-    setError(null); // Reset lỗi mỗi lần gọi lại
 
     try {
       // Giả định Backend của ông có API GET /databases
@@ -22,7 +22,8 @@ const useDatabases = () => {
       setDatabases(dataList);
     } catch (err) {
       console.error("❌ Lỗi lấy danh sách DB:", err);
-      setError(
+      showNotification(
+        "error",
         err?.response?.data?.message || "Không thể tải danh sách kết nối",
       );
     } finally {
@@ -38,8 +39,7 @@ const useDatabases = () => {
   return {
     databases,
     isLoading,
-    error,
-    refetch: fetchDatabases, // Trả về hàm này để lát nữa gọi sau khi Add thành công
+    fetchDatabases,
   };
 };
 
