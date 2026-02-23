@@ -26,9 +26,9 @@ export const subscribeTokenRefresh = (callback) => {
 let isRefreshing = false;
 let refreshSubscribers = []; // Mảng chứa các "lời hứa" (Promises)
 
-// Hàm 2: Thả xích cho toàn bộ request đang chờ
+// Sửa thành ({ resolve }) => resolve(token)
 const onRefreshed = (token) => {
-  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers.forEach(({ resolve }) => resolve(token));
   refreshSubscribers = []; // Dọn sạch phòng chờ
 };
 
@@ -59,8 +59,8 @@ axiosClient.interceptors.response.use(
       // Kịch bản A: Đã có thằng đi xin Token -> Đứng lại chờ!
       if (isRefreshing) {
         // CHỖ ĂN TIỀN: Code dừng lại đúng ở dòng này cho đến khi có Token mới
-        const newToken = await new Promise((resolve) => {
-          refreshSubscribers.push(resolve);
+        const newToken = await new Promise((resolve, reject) => {
+          refreshSubscribers.push({ resolve, reject });
         });
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;

@@ -1,6 +1,7 @@
 import useAddConnection from "../hooks/useAddConnection";
+import AsyncButton from "./AsyncButton";
 
-const AddConnectionModal = ({ onClose }) => {
+const AddConnectionModal = ({ fetchDatabases, onClose }) => {
   const {
     handleInputChange,
     handleSave,
@@ -192,14 +193,14 @@ const AddConnectionModal = ({ onClose }) => {
           <button className="btn btn-light fw-medium px-4" onClick={onClose}>
             Hủy
           </button>
-          <button
+          <AsyncButton
             className="btn btn-dark fw-bold px-4 shadow-sm"
             onClick={() => {
-              handleSave(onClose);
+              handleSave(fetchDatabases, onClose);
             }}
           >
             Lưu Kết Nối
-          </button>
+          </AsyncButton>
         </div>
       </div>
     </div>

@@ -1,71 +1,84 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AddConnectionModal from "../components/AddConnectionModal";
 import useDisplayDatabase from "../hooks/useDisplayDatabase";
+import DeleteDatabaseModal from "../components/DeleteDatabaseModal";
+import EditDatabaseModal from "../components/EditDatabaseModal";
+import useActiveDatabase from "../hooks/useActiveDatabase";
+import useTestConnection from "../hooks/useTestConnection";
+import useGetSchema from "../hooks/useGetSchema";
+import AsyncButton from "../components/AsyncButton";
+import formatSchemaData from "../utils/formatSchema";
 
 const DatabaseConnectionPage = () => {
-  const [openAddModal, setOpenaAddModal] = useState(false);
+  const [openAddModal, setOpenAddModal] = useState(false);
   const { databases, isLoading, fetchDatabases } = useDisplayDatabase();
-  console.log(databases);
+  const [deletingId, setDeletingId] = useState(null);
+  const [editingDb, setEditingDb] = useState(null); // Lưu nguyên cục Object, không phải mỗi ID
+  const { executeActive } = useActiveDatabase();
+  const { executeTest } = useTestConnection();
+  const { fetchSchema } = useGetSchema();
 
-  // const [databases, setDatabases] = useState([
-  //   {
-  //     id: 1,
-  //     name: "GymConnect_Prod",
-  //     type: "MySQL",
-  //     host: "103.145.22.1",
-  //     port: "3306",
-  //     database: "gym_prod_db",
-  //     isActive: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Local_Testing",
-  //     type: "MySQL",
-  //     host: "localhost",
-  //     port: "3306",
-  //     database: "gym_local_test",
-  //     isActive: false,
-  //   },
-  // ]);
-
+  // State để chứa data đã được gọt rửa
+  const [activeSchemaData, setActiveSchemaData] = useState([]);
   const [showSchema, setShowSchema] = useState(false);
   const [selectedDbName, setSelectedDbName] = useState("");
 
-  const mockSchemaData = [
-    {
-      tableName: "users",
-      columns: [
-        { name: "id", type: "int(11)", isPk: true },
-        { name: "email", type: "varchar(255)", isPk: false },
-        { name: "password", type: "varchar(255)", isPk: false },
-        { name: "created_at", type: "timestamp", isPk: false },
-      ],
-    },
-    {
-      tableName: "subscriptions",
-      columns: [
-        { name: "id", type: "int(11)", isPk: true },
-        { name: "user_id", type: "int(11)", isPk: false, isFk: true },
-        { name: "plan_name", type: "varchar(100)", isPk: false },
-        { name: "expires_at", type: "date", isPk: false },
-      ],
-    },
-  ];
+  // const mockSchemaData = [
+  //   {
+  //     tableName: "users",
+  //     columns: [
+  //       { name: "id", type: "int(11)", isPk: true },
+  //       { name: "email", type: "varchar(255)", isPk: false },
+  //       { name: "password", type: "varchar(255)", isPk: false },
+  //       { name: "created_at", type: "timestamp", isPk: false },
+  //     ],
+  //   },
+  //   {
+  //     tableName: "subscriptions",
+  //     columns: [
+  //       { name: "id", type: "int(11)", isPk: true },
+  //       { name: "user_id", type: "int(11)", isPk: false, isFk: true },
+  //       { name: "plan_name", type: "varchar(100)", isPk: false },
+  //       { name: "expires_at", type: "date", isPk: false },
+  //     ],
+  //   },
+  // ];
 
-  const handleViewSchema = (dbName) => {
-    setSelectedDbName(dbName);
-    setShowSchema(true);
+  const handleViewSchema = (db) => {
+    setSelectedDbName(db.db_name); // Set cái tên hiển thị trên header
+
+    // Nhét thuộc tính schema của ông vào máy xay (tùy Backend ông đặt key là gì, tôi ví dụ là schema_json)
+    const formattedData = formatSchemaData(db.schema_json);
+
+    setActiveSchemaData(formattedData); // Cập nhật State
+    setShowSchema(true); // Vuốt Offcanvas bay ra!
   };
 
   return (
     <>
       {openAddModal && (
         <AddConnectionModal
-          onClose={() => {
-            setOpenaAddModal(false);
-          }}
+          fetchDatabases={fetchDatabases}
+          onClose={() => setOpenAddModal(false)}
         />
       )}
+
+      {deletingId && (
+        <DeleteDatabaseModal
+          deletingId={deletingId}
+          setDeletingId={setDeletingId}
+          fetchDatabases={fetchDatabases}
+        />
+      )}
+
+      {editingDb && (
+        <EditDatabaseModal
+          editingDb={editingDb}
+          setEditingDb={setEditingDb}
+          fetchDatabases={fetchDatabases}
+        />
+      )}
+
       <div
         className="container-fluid h-100 p-4 d-flex flex-column position-relative"
         style={{ backgroundColor: "#f8fafc", overflowY: "auto" }}
@@ -87,7 +100,7 @@ const DatabaseConnectionPage = () => {
 
           <button
             onClick={() => {
-              setOpenaAddModal(true);
+              setOpenAddModal(true);
             }}
             className="btn btn-dark fw-bold px-4 shadow-sm d-flex align-items-center gap-2"
           >
@@ -171,68 +184,89 @@ const DatabaseConnectionPage = () => {
                   </div>
 
                   {/* Nút thao tác */}
+
                   <div className="d-flex align-items-center gap-3">
-                    <div className="d-flex align-items-center gap-2 border-end pe-4 me-2">
-                      <button className="btn btn-sm btn-outline-secondary fw-medium d-flex align-items-center gap-2 border-0">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                    {!!db.is_active && (
+                      <div className="d-flex align-items-center gap-2 border-end pe-4 me-2">
+                        <AsyncButton
+                          onClick={() => executeTest(db.id)}
+                          className="btn-sm btn-outline-primary fw-medium d-flex align-items-center gap-2 border-0"
                         >
-                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        Test Connection
-                      </button>
+                          {/* Nhét cái ruột (children) vào đây! */}
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                          </svg>
+                          Kiểm tra kết nối
+                        </AsyncButton>
 
-                      <button className="btn btn-sm btn-outline-primary fw-medium d-flex align-items-center gap-1 border-0">
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                        <AsyncButton
+                          onClick={() => fetchSchema(fetchDatabases)}
+                          className="btn btn-sm btn-outline-primary fw-medium d-flex align-items-center gap-1 border-0"
                         >
-                          <polyline points="23 4 23 10 17 10"></polyline>
-                          <polyline points="1 20 1 14 7 14"></polyline>
-                          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                        </svg>
-                        Sync
-                      </button>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                          </svg>
+                          Lấy cấu trúc
+                        </AsyncButton>
 
-                      <button
-                        className="btn btn-sm btn-light fw-medium d-flex align-items-center gap-1 border shadow-sm"
-                        onClick={() => handleViewSchema(db.name)}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                        <button
+                          className="btn btn-sm btn-light fw-medium d-flex align-items-center gap-1 border shadow-sm"
+                          onClick={() => handleViewSchema(db)}
                         >
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        Schema{" "}
-                        <span
-                          className="text-muted fw-normal"
-                          style={{ fontSize: "0.7rem" }}
-                        ></span>
-                      </button>
-                    </div>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          Cấu trúc{" "}
+                          <span
+                            className="text-muted fw-normal"
+                            style={{ fontSize: "0.7rem" }}
+                          ></span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* TRẢ LẠI MENU SỬA/XÓA Ở ĐÂY */}
                     <div className="d-flex align-items-center gap-2">
-                      {!db.isActive && (
-                        <button className="btn btn-success fw-bold px-4 shadow-sm">
+                      {!db.is_active ? (
+                        <AsyncButton
+                          onClick={() => executeActive(db.id, fetchDatabases)}
+                          className="btn btn-success fw-bold px-4 shadow-sm"
+                        >
                           Kích hoạt
-                        </button>
+                        </AsyncButton>
+                      ) : (
+                        <AsyncButton
+                          onClick={() => executeActive(db.id, fetchDatabases)}
+                          className="btn btn-secondary fw-bold px-4 shadow-sm"
+                          disable="true"
+                        >
+                          Đang kích hoạt
+                        </AsyncButton>
                       )}
 
                       <div className="dropdown">
@@ -256,7 +290,10 @@ const DatabaseConnectionPage = () => {
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2 rounded-3">
                           <li>
-                            <button className="dropdown-item d-flex align-items-center gap-2 py-2">
+                            <button
+                              onClick={() => setEditingDb(db)}
+                              className="dropdown-item d-flex align-items-center gap-2 py-2"
+                            >
                               <svg
                                 width="14"
                                 height="14"
@@ -275,7 +312,12 @@ const DatabaseConnectionPage = () => {
                             <hr className="dropdown-divider" />
                           </li>
                           <li>
-                            <button className="dropdown-item text-danger d-flex align-items-center gap-2 py-2">
+                            <button
+                              onClick={() => {
+                                setDeletingId(db.id);
+                              }}
+                              className="dropdown-item text-danger d-flex align-items-center gap-2 py-2"
+                            >
                               <svg
                                 width="14"
                                 height="14"
@@ -364,7 +406,7 @@ const DatabaseConnectionPage = () => {
 
           {/* Khu vực cuộn chứa các Card Table */}
           <div className="p-4 overflow-auto custom-scrollbar h-100 pb-5">
-            {mockSchemaData.map((table, idx) => (
+            {activeSchemaData.map((table, idx) => (
               <div
                 className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4"
                 key={idx}

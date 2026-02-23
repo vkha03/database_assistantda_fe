@@ -22,7 +22,7 @@ const useAddConnection = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = async (onClose) => {
+  const handleSave = async (onClose, fetchDatabases) => {
     if (!formData.db_host || !formData.db_user || !formData.db_name) {
       showNotification(
         "error",
@@ -35,6 +35,7 @@ const useAddConnection = () => {
       const res = await axiosClient.post("/databases", formData);
       showNotification("success", res.data.message || "Thêm thành công");
       onClose(); // Đóng Modal khi thêm thành công
+      fetchDatabases();
     } catch (error) {
       console.error(
         "❌ Lỗi thêm mới:",
